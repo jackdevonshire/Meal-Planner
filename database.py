@@ -45,6 +45,10 @@ class Ingredient(Base):
             raise ValueError(f"Ingredient with ID {id} does not exist.")
 
     def add_ingredient(self, name, unit_type, category_type):
+        for ingredient in self.get_all_ingredients():
+            if name.lower() == ingredient.name.lower():
+                raise ValueError("This ingredient already exists!")
+
         # Add a new ingredient to the database
         new_ingredient = Ingredient(
             name=name,
@@ -62,6 +66,18 @@ class Ingredient(Base):
             session.commit()
         else:
             raise ValueError(f"Ingredient with ID {id} does not exist.")
+
+    def search(self, query):
+        if query == "":
+            return self.get_all_ingredients()
+        # Perform a case-insensitive search with partial matching using 'ilike'
+        ingredients = session.query(Ingredient).filter(Ingredient.name.ilike(f"%{query}%")).all()
+
+        # If ingredients are found, return them
+        if ingredients:
+            return ingredients
+        else:
+            return []
 
 class Recipe(Base):
     __tablename__ = 'recipe'

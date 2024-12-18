@@ -34,11 +34,13 @@ def main_menu():
     else:
         return main_menu()
 
-def ingredient_manager_menu():
+def ingredient_manager_menu(ingredients=None):
     os.system('cls' if os.name == 'nt' else 'clear')
 
     print("Ingredients")
-    ingredients = Ingredient().get_all_ingredients()
+    if not ingredients:
+        ingredients = Ingredient().get_all_ingredients()
+
     table = PrettyTable()
     table.field_names = ["Ingredient ID", "Name", "Unit Type", "Category"]
     for ingredient in ingredients:
@@ -56,13 +58,22 @@ def ingredient_manager_menu():
     print("2. Remove Ingredient")
     print("3. Main Menu")
 
-    option = get_menu_option()
-    if option == 1:
-        return add_ingredient_menu()
-    elif option == 2:
-        return remove_ingredient_menu()
-    else:
-        return main_menu()
+    option = input("==> ")
+    try:
+        option = int(option)
+        if option == 1:
+            return add_ingredient_menu()
+        elif option == 2:
+            return remove_ingredient_menu()
+        else:
+            return main_menu()
+    except:
+        query = option
+        results = Ingredient().search(query)
+        ingredient_manager_menu(results)
+
+
+
 
 def add_ingredient_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -91,8 +102,11 @@ def add_ingredient_menu():
     if not (category_type >= 1 and category_type <= 7):
         return ingredient_manager_menu()
 
-    Ingredient().add_ingredient(ingredient_name, unit_type, category_type)
-    print("\nIngredient Added!")
+    try:
+        Ingredient().add_ingredient(ingredient_name, unit_type, category_type)
+        print("\nIngredient Added!")
+    except:
+        print("\nIngredient already exists!")
     time.sleep(2)
     return ingredient_manager_menu()
 
@@ -247,7 +261,7 @@ def recipe_menu(recipe_id):
         option = get_menu_option()
         if option == 1:
             print("\nRecipe Removed!")
-            time.sleep(2)
+            time.sleep(1)
             Recipe().remove_recipe(recipe_id)
         return view_recipes_menu()
     else:

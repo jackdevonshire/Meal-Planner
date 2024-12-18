@@ -1,11 +1,28 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Text, create_engine
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.orm import sessionmaker
+from enum import Enum
 
 Base = declarative_base()
 engine = create_engine('sqlite:///meals.db')
 Session = sessionmaker(bind=engine)
 session = Session()
+
+class UnitType(Enum):
+    Whole = 1
+    Milliliters = 2
+    Grams = 3
+    Teaspoon = 4
+    TableSpoon = 5
+
+class Category(Enum):
+    Meat = 1
+    Fish = 2
+    Dairy = 3
+    Vegetable = 4
+    Pantry = 5
+    FridgeOther = 6
+    Bread = 7
 
 class Ingredient(Base):
     __tablename__ = 'ingredient'
@@ -15,6 +32,49 @@ class Ingredient(Base):
     unit_type = Column(Integer, nullable=False)
     category_type = Column(Integer, nullable=False)
 
+    def get_all_ingredients(self):
+        # Retrieve all ingredients from the database
+        ingredients = session.query(Ingredient).all()
+        return [
+            {
+                "id": ingredient.id,
+                "name": ingredient.name,
+                "unit_type": ingredient.unit_type,
+                "category_type": ingredient.category_type
+            } for ingredient in ingredients
+        ]
+
+    def get_ingredient(self, id):
+        # Retrieve a specific ingredient by ID
+        ingredient = session.query(Ingredient).filter_by(id=id).first()
+        if ingredient:
+            return {
+                "id": ingredient.id,
+                "name": ingredient.name,
+                "unit_type": ingredient.unit_type,
+                "category_type": ingredient.category_type
+            }
+        else:
+            raise ValueError(f"Ingredient with ID {id} does not exist.")
+
+    def add_ingredient(self, name, unit_type, category_type):
+        # Add a new ingredient to the database
+        new_ingredient = Ingredient(
+            name=name,
+            unit_type=unit_type,
+            category_type=category_type
+        )
+        session.add(new_ingredient)
+        session.commit()
+
+    def remove_ingredient(self, id):
+        # Remove an ingredient by ID from the database
+        ingredient = session.query(Ingredient).filter_by(id=id).first()
+        if ingredient:
+            session.delete(ingredient)
+            session.commit()
+        else:
+            raise ValueError(f"Ingredient with ID {id} does not exist.")
 
 class Recipe(Base):
     __tablename__ = 'recipe'
@@ -119,6 +179,7 @@ class RecipeIngredient(Base):
 
     recipe = relationship("Recipe", back_populates="ingredients")
     ingredient = relationship("Ingredient")
+
 
 class RecipeInstruction(Base):
     __tablename__ = 'recipe_instruction'

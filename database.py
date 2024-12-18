@@ -210,6 +210,18 @@ class Recipe(Base):
         recipe_instructions = session.query(RecipeInstruction).filter_by(recipe_id=self.id).order_by(RecipeInstruction.step_number.asc()).all()
         return recipe_instructions
 
+    def search(self, query):
+        if query == "":
+            return self.get_recipes()
+        # Perform a case-insensitive search with partial matching using 'ilike'
+        recipes = session.query(Recipe).filter(Recipe.name.ilike(f"%{query}%")).all()
+
+        # If ingredients are found, return them
+        if recipes:
+            return recipes
+        else:
+            return []
+
 class RecipeIngredient(Base):
     __tablename__ = 'recipe_ingredient'
 

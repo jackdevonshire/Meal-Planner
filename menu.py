@@ -166,10 +166,11 @@ def add_recipe_menu():
     recipe_id = Recipe().add_recipe(recipe_name, source, prep_time, total_time)
     return recipe_menu(recipe_id)
 
-def view_recipes_menu():
+def view_recipes_menu(recipes=None):
     os.system('cls' if os.name == 'nt' else 'clear')
 
-    recipes = Recipe().get_recipes()
+    if not recipes:
+        recipes = Recipe().get_recipes()
 
     print("=== Recipes ===")
 
@@ -196,11 +197,20 @@ def view_recipes_menu():
 
     print(table)
     print("\nType a recipe number, or enter to go back")
-    option = get_menu_option()
-    if option in valid_ids:
-        return recipe_menu(option)
-    else:
-        return recipe_manager_menu()
+    option = input("==> ")
+
+    try:
+        option = int(option)
+        if option in valid_ids:
+            return recipe_menu(option)
+        else:
+            return recipe_manager_menu()
+    except:
+        if option == "":
+            return recipe_manager_menu()
+
+        results = Recipe().search(option)
+        return view_recipes_menu(results)
 
 
 def recipe_menu(recipe_id):
@@ -263,9 +273,9 @@ def recipe_menu(recipe_id):
             print("\nRecipe Removed!")
             time.sleep(1)
             Recipe().remove_recipe(recipe_id)
-        return view_recipes_menu()
+        return recipe_manager_menu()
     else:
-        return view_recipes_menu()
+        return recipe_manager_menu()
 
 def add_instruction_menu(recipe_id):
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -293,14 +303,17 @@ def add_instruction_menu(recipe_id):
         recipe.add_instruction(new_step_number, new_instruction)
 
 
-def add_recipe_ingredient_menu(recipe_id):
+def add_recipe_ingredient_menu(recipe_id, ingredients=None):
     os.system('cls' if os.name == 'nt' else 'clear')
-    ingredients = Ingredient().get_all_ingredients()
+
+    if not ingredients:
+        ingredients = Ingredient().get_all_ingredients()
 
     print("=== Available Ingredients ===")
     table = PrettyTable()
     table.field_names = ["Ingredient ID", "Name", "Unit Type", "Category Type"]
     valid_ingredients = []
+
     for ingredient in ingredients:
         valid_ingredients.append(ingredient.id)
         table.add_row([
@@ -312,10 +325,21 @@ def add_recipe_ingredient_menu(recipe_id):
 
     print(table)
     print("\n")
-    print("Select an ingredient to add")
-    ingredient_id = get_menu_option()
-    if ingredient_id not in valid_ingredients:
-        return recipe_menu(recipe_id)
+
+    print("Select an ingredient to add (or enter to exit)")
+    ingredient_id = input("==> ")
+
+    try:
+        ingredient_id = int(ingredient_id)
+        if ingredient_id not in valid_ingredients:
+            return recipe_menu(recipe_id)
+    except:
+        query = ingredient_id
+        if query == "":
+            return recipe_menu(recipe_id)
+
+        results = Ingredient().search(query)
+        return add_recipe_ingredient_menu(recipe_id, results)
 
     ingredient = Ingredient().get_ingredient(ingredient_id)
     print(f"\nSelected {ingredient.name}. Unit type: {UnitType(ingredient.unit_type).name}")

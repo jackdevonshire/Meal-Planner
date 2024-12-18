@@ -1,6 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, Text, create_engine
-from sqlalchemy.orm import relationship, declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship, declarative_base, aliased, sessionmaker
 from enum import Enum
 
 Base = declarative_base()
@@ -35,25 +34,13 @@ class Ingredient(Base):
     def get_all_ingredients(self):
         # Retrieve all ingredients from the database
         ingredients = session.query(Ingredient).all()
-        return [
-            {
-                "id": ingredient.id,
-                "name": ingredient.name,
-                "unit_type": ingredient.unit_type,
-                "category_type": ingredient.category_type
-            } for ingredient in ingredients
-        ]
+        return ingredients
 
     def get_ingredient(self, id):
         # Retrieve a specific ingredient by ID
         ingredient = session.query(Ingredient).filter_by(id=id).first()
         if ingredient:
-            return {
-                "id": ingredient.id,
-                "name": ingredient.name,
-                "unit_type": ingredient.unit_type,
-                "category_type": ingredient.category_type
-            }
+            return ingredient
         else:
             raise ValueError(f"Ingredient with ID {id} does not exist.")
 
@@ -85,9 +72,44 @@ class Recipe(Base):
     prep_time = Column(Integer)
     total_time = Column(Integer)
 
-    ingredients = relationship("RecipeIngredient", back_populates="recipe")
-    instructions = relationship("RecipeInstruction", back_populates="recipe", uselist=False)
-    nutrients = relationship("RecipeNutrient", back_populates="recipe", uselist=False)
+    ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
+    instructions = relationship("RecipeInstruction", back_populates="recipe", uselist=False, cascade="all, delete-orphan")
+    nutrients = relationship("RecipeNutrient", back_populates="recipe", uselist=False, cascade="all, delete-orphan")
+
+
+    def get_recipes(self):
+        # Retrieve all recipes from the database
+        recipes = session.query(Recipe).all()
+        return recipes
+
+    def get_recipe(self, id):
+        # Retrieve a specific recipe by ID, including its ingredients and instructions
+        recipe = session.query(Recipe).filter_by(id=id).first()
+        if recipe:
+            return recipe
+        else:
+            raise ValueError(f"Recipe with ID {id} does not exist.")
+
+    def add_recipe(self, name, source, prep_time, total_time):
+        # Add a new recipe to the database
+        new_recipe = Recipe(
+            name=name,
+            source=source,
+            prep_time=prep_time,
+            total_time=total_time
+        )
+        session.add(new_recipe)
+        session.commit()
+        return new_recipe.id  # Return the ID of the newly added recipe
+
+    def remove_recipe(self, id):
+        # Remove a recipe by ID from the database
+        recipe = session.query(Recipe).filter_by(id=id).first()
+        if recipe:
+            session.delete(recipe)
+            session.commit()
+        else:
+            raise ValueError(f"Recipe with ID {id} does not exist.")
 
     def add_ingredient(self, ingredient_id, amount, required):
         # Check if the ingredient exists
@@ -105,10 +127,10 @@ class Recipe(Base):
         session.add(new_recipe_ingredient)
         session.commit()
 
-    def remove_ingredient(self, ingredient_id):
+    def remove_ingredient(self, recipe_id, ingredient_id):
         # Find the recipe-ingredient relation
         recipe_ingredient = session.query(RecipeIngredient).filter_by(
-            recipe_id=self.id,
+            recipe_id=recipe_id,
             ingredient_id=ingredient_id
         ).first()
         if recipe_ingredient:
@@ -135,10 +157,10 @@ class Recipe(Base):
         session.add(new_instruction)
         session.commit()
 
-    def remove_instruction(self, step_number):
+    def remove_instruction(self, recipe_id, step_number):
         # Find the instruction for the given step
         instruction = session.query(RecipeInstruction).filter_by(
-            recipe_id=self.id,
+            recipe_id=recipe_id,
             step_number=step_number
         ).first()
         if instruction:
@@ -147,27 +169,30 @@ class Recipe(Base):
         else:
             raise ValueError(f"Step number {step_number} does not exist for this recipe.")
 
-
     def get_all_ingredients(self):
-        # Retrieve all ingredients for this recipe
-        recipe_ingredients = session.query(RecipeIngredient).filter_by(recipe_id=self.id).order_by(RecipeIngredient.required.desc()).all()
-        return [
-            {
-                "ingredient_id": ingredient.ingredient_id,
-                "amount": ingredient.amount,
-                "required": bool(ingredientrequired)
-            } for ingredient in recipe_ingredients
-        ]
+        # Create an alias for the Ingredient table
+        ingredient_alias = aliased(Ingredient)
+
+        # Retrieve all ingredients for this recipe with an inner join
+        recipe_ingredients = session.query(
+            ingredient_alias.id.label('ingredient_id'),
+            ingredient_alias.name,
+            ingredient_alias.unit_type,
+            ingredient_alias.category_type,
+            RecipeIngredient.amount,
+            RecipeIngredient.required
+        ).join(
+            RecipeIngredient, RecipeIngredient.ingredient_id == ingredient_alias.id
+        ).filter(
+            RecipeIngredient.recipe_id == self.id
+        ).order_by(RecipeIngredient.required.desc()).all()
+
+        return recipe_ingredients
 
     def get_all_steps(self):
         # Retrieve all steps for this recipe in order
         recipe_instructions = session.query(RecipeInstruction).filter_by(recipe_id=self.id).order_by(RecipeInstruction.step_number.asc()).all()
-        return [
-            {
-                "step_number": instruction.step_number,
-                "instructions": instruction.instructions
-            } for instruction in recipe_instructions
-        ]
+        return recipe_instructions
 
 class RecipeIngredient(Base):
     __tablename__ = 'recipe_ingredient'
@@ -184,7 +209,8 @@ class RecipeIngredient(Base):
 class RecipeInstruction(Base):
     __tablename__ = 'recipe_instruction'
 
-    recipe_id = Column(Integer, ForeignKey('recipe.id'), primary_key=True, autoincrement=True, unique=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True, unique=True, nullable=False)
+    recipe_id = Column(Integer, ForeignKey('recipe.id'), nullable=False)
     step_number = Column(Integer, nullable=False)
     instructions = Column(Text)
 

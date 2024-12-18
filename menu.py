@@ -22,7 +22,7 @@ def main_menu():
     print("=== Main Menu ===")
     print("1. Recipe Manager ")
     print("2. Ingredient Manager")
-    print("3. Shopping List Generator")
+    print("3. Shopping List Generator - TODO")
 
     option = get_menu_option()
     if option == 1:
@@ -51,7 +51,7 @@ def ingredient_manager_menu():
 
     print(table)
 
-    print("=== Ingredients Manager Menu ===")
+    print("\n=== Ingredients Manager Menu ===")
     print("1. Add Ingredient")
     print("2. Remove Ingredient")
     print("3. Main Menu")
@@ -60,7 +60,7 @@ def ingredient_manager_menu():
     if option == 1:
         return add_ingredient_menu()
     elif option == 2:
-        return None # TODO
+        return remove_ingredient_menu()
     else:
         return main_menu()
 
@@ -96,6 +96,33 @@ def add_ingredient_menu():
     time.sleep(2)
     return ingredient_manager_menu()
 
+def remove_ingredient_menu():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("Ingredients")
+    ingredients = Ingredient().get_all_ingredients()
+    table = PrettyTable()
+    table.field_names = ["Ingredient ID", "Name", "Unit Type", "Category"]
+    valid_ingredients = []
+    for ingredient in ingredients:
+        valid_ingredients.append(ingredient.id)
+        table.add_row([
+            ingredient.id,
+            ingredient.name,
+            f"{UnitType(ingredient.unit_type).name}",
+            f"{Category(ingredient.category_type).name}",
+        ])
+    print(table)
+
+    print("\n=== Remove Ingredient ===")
+    ingredient_id = int(input("Enter Ingredient Id: "))
+    if ingredient_id not in valid_ingredients:
+        return ingredient_manager_menu()
+
+    Ingredient().remove_ingredient(ingredient_id)
+    print("\nIngredient Removed!")
+    time.sleep(1)
+
+    return ingredient_manager_menu()
 
 
 def recipe_manager_menu():
@@ -110,10 +137,20 @@ def recipe_manager_menu():
     if option == 1:
         return view_recipes_menu()
     elif option == 2:
-        return None # TODO
+        return add_recipe_menu()
     else:
         return main_menu()
 
+def add_recipe_menu():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("=== Add Recipe ===")
+    recipe_name = input("Enter recipe name: ")
+    source = input("Enter recipe source: ")
+    prep_time = int(input("Enter recipe prep time (mins): "))
+    total_time = int(input("Enter total recipe time (mins): "))
+
+    recipe_id = Recipe().add_recipe(recipe_name, source, prep_time, total_time)
+    return recipe_menu(recipe_id)
 
 def view_recipes_menu():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -124,7 +161,7 @@ def view_recipes_menu():
 
     if not recipes:
         print("\nNo recipes available.")
-        time.sleep(2)
+        time.sleep(1)
         return recipe_manager_menu()
 
     # Create a PrettyTable instance
@@ -152,7 +189,7 @@ def view_recipes_menu():
         return recipe_manager_menu()
 
 
-def recipe_menu(recipe_id): # TODO - NEED TO RETURN RECIPE STEPS AS-WELL
+def recipe_menu(recipe_id):
     os.system('cls' if os.name == 'nt' else 'clear')
 
     try:
@@ -181,7 +218,15 @@ def recipe_menu(recipe_id): # TODO - NEED TO RETURN RECIPE STEPS AS-WELL
             f"{Category(ingredient.category_type).name}"
         ])
     print(ingredients_table)
-
+    print("\nRecipe Instructions")
+    instructions_table = PrettyTable()
+    instructions_table.field_names = ["Step", "Instruction"]
+    for instruction in recipe.get_all_steps():
+        instructions_table.add_row([
+            instruction.step_number,
+            instruction.instructions
+        ])
+    print(instructions_table)
 
     print("\n=== Recipe Menu ===")
     print("1. Add Ingredient")
@@ -193,7 +238,7 @@ def recipe_menu(recipe_id): # TODO - NEED TO RETURN RECIPE STEPS AS-WELL
     if option == 1:
         return add_recipe_ingredient_menu(recipe_id)
     elif option == 2:
-        return None # TODO
+        return add_instruction_menu(recipe_id)
     elif option == 3:
         os.system('cls' if os.name == 'nt' else 'clear')
         print("=== Confirm Delete ===")
@@ -207,6 +252,32 @@ def recipe_menu(recipe_id): # TODO - NEED TO RETURN RECIPE STEPS AS-WELL
         return view_recipes_menu()
     else:
         return view_recipes_menu()
+
+def add_instruction_menu(recipe_id):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    recipe = Recipe().get_recipe(recipe_id)
+    instructions = recipe.get_all_steps()
+    max_step = 0
+    for step in instructions:
+        if step.step_number >= max_step:
+            max_step = step.step_number
+
+    new_step_number = max_step
+
+    print("== Add Instruction ==")
+    for instruction in instructions:
+        print(f"{instruction.step_number}. {instruction.instructions}")
+
+    print("\n")
+    print("Enter new instruction, or press enter to exit: ")
+    while True:
+        new_step_number += 1
+        new_instruction = input("==> ")
+        if new_instruction == "":
+            return recipe_menu(recipe_id)
+
+        recipe.add_instruction(new_step_number, new_instruction)
+
 
 def add_recipe_ingredient_menu(recipe_id):
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -250,7 +321,7 @@ def add_recipe_ingredient_menu(recipe_id):
     recipe.add_ingredient(ingredient_id, amount, required)
 
     print("\nIngredient Added!")
-    time.sleep(2)
+    time.sleep(1)
 
     return recipe_menu(recipe_id)
 

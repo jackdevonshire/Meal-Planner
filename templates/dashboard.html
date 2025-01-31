@@ -78,6 +78,15 @@
             <label for="configTotalTime" class="form-label">Total Time (mins)</label>
             <input id="configTotalTime" type="number" name="configTotalTime" placeholder="Total Time" class="form-control">
         </div>
+        <div class="mb-3">
+            <label for="configType" class="form-label">Type</label>
+            <select class="form-control" id="configType" name="configType">
+                <option value="1">Breakfast</option>
+                <option value="2">Main</option>
+                <option value="3">Side</option>
+                <option value="4">Dessert</option>
+            </select>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -94,6 +103,7 @@
        const source = document.getElementById("configSource").value.trim();
        const prepTime = document.getElementById("configPrepTime").value.trim();
        const totalTime = document.getElementById("configTotalTime").value.trim();
+       const type = document.getElementById("configType").value.trim();
 
        // Validate required field (name)
        if (!name) {
@@ -106,7 +116,8 @@
            name: name,
            source: source || null,
            prep_time: prepTime ? parseInt(prepTime) : null,
-           total_time: totalTime ? parseInt(totalTime) : null
+           total_time: totalTime ? parseInt(totalTime) : null,
+           type: type
        };
 
        try {

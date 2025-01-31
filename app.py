@@ -47,7 +47,7 @@ def get_recipe(id):
 def add_recipe():
     data = request.json
     new_recipe = Recipe(name=data.get('name'), source=data.get('source'), prep_time=data.get('prep_time'),
-                        total_time=data.get('total_time'))
+                        total_time=data.get('total_time'), type=data.get('type'))
     session.add(new_recipe)
     session.commit()
     return jsonify({'id': new_recipe.id, 'message': 'Recipe added successfully'})

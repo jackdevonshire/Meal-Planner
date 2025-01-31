@@ -14,59 +14,106 @@
             <h3>{{data["Recipe"]["Name"]}}</h3>
          </div>
             <div class="row">
+                <div class="col-sm-6 col-md-6 col-lg-4 mt-4">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="icon-big text-center">
+                                        <i class="teal fas fa-clock"></i>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="detail">
+                                        <p class="detail-subtitle">Prep Time</p>
+                                        <span class="number">{{data["Recipe"]["PrepTime"]}} mins</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-4 mt-4">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="icon-big text-center">
+                                        <i class="teal fas fa-clock"></i>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="detail">
+                                        <p class="detail-subtitle">Total Time</p>
+                                        <span class="number">{{data["Recipe"]["TotalTime"]}} mins</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6 col-lg-4 mt-4">
+                    <div class="card">
+                        <div class="content">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="icon-big text-center">
+                                        <i class="teal fas fa-heart"></i>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="detail">
+                                        <p class="detail-subtitle">Calories</p>
+                                        <span class="number">{{data["Recipe"]["Nutrients"]["Calories"]}} kcal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="content">
                             <div class="head">
-                                <h4 class="mb-0">Information</h4>
+                                <h4 class="mb-0">Nutrition (per meal)</h4>
                             </div>
                             <br>
                             <div class="canvas-wrapper">
                                 <table class="table table-striped">
                                     <tbody>
                                         <tr>
-                                            <td>Source</td>
-                                            <td class="text-end">{{data["Recipe"]["Source"]}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Prep Time</td>
-                                            <td class="text-end">{{data["Recipe"]["PrepTime"]}}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Total Time</td>
-                                            <td class="text-end">{{data["Recipe"]["TotalTime"]}}</td>
-                                        </tr>
-                                        <tr>
                                             <td>Calories</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Calories"]}} kcal</td>
                                         </tr>
                                         <tr>
                                             <td>Fat</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Fat"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Saturated Fat</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["SatFat"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Carbohydrates</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Carbs"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Sugar</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Sugar"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Fibre</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Fibre"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Protein</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Protein"]}} g</td>
                                         </tr>
                                         <tr>
                                             <td>Salt</td>
-                                            <td class="text-end">21,280</td>
+                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Salt"]}} g</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -78,58 +125,37 @@
                     <div class="card">
                         <div class="content">
                             <div class="head">
-                                <h5 class="mb-0">Most Visited Pages</h5>
-                                <p class="text-muted">Current year website visitor data</p>
+                                <h4 class="mb-0">Ingredients</h4>
                             </div>
-                            <div class="canvas-wrapper">
+                            <div class="canvas-wrapper" style="overflow-y:scroll; height:400px; display:block;">
                                 <table class="table table-striped">
                                     <thead class="success">
                                         <tr>
-                                            <th>Page Name</th>
-                                            <th class="text-end">Visitors</th>
+                                            <th>Ingredient</th>
+                                            <th>Amount</th>
+                                            <th>Required</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    {% for recipe_ingredient in data["Recipe"]["Ingredients"] %}
                                         <tr>
-                                            <td>/about.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">8,340</td>
+                                            <td>{{recipe_ingredient["Ingredient"]["Name"]}}</td>
+                                            <td>
+                                                {{recipe_ingredient["Amount"]}} <small>{{recipe_ingredient["Ingredient"]["UnitType"]}}</small>
+                                            </td>
+                                            <td>
+                                                {% if recipe_ingredient["Required"] == 0 %}
+                                                Yes
+                                                {% else  %}
+                                                No
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                EDIT HERE
+                                            </td>
                                         </tr>
-                                        <tr>
-                                            <td>/special-promo.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">7,280</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/products.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">6,210</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/documentation.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">5,176</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/customer-support.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">4,276</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/index.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">3,176</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/products-pricing.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">2,176</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/product-features.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">1,886</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/contact-us.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">1,509</td>
-                                        </tr>
-                                        <tr>
-                                            <td>/terms-and-condition.html <a href="#"><i class="fas fa-link blue"></i></a></td>
-                                            <td class="text-end">1,100</td>
-                                        </tr>
+                                    {% endfor %}
                                     </tbody>
                                 </table>
                             </div>

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS "recipe" (
     "source" TEXT,
     "prep_time" INTEGER,
     "total_time" INTEGER,
+    "type"	INTEGER NOT NULL,
     PRIMARY KEY("id" AUTOINCREMENT)
 );
 

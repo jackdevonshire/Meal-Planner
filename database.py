@@ -25,6 +25,12 @@ class Category(Enum):
     FridgeOther = 6
     Bread = 7
 
+class RecipeType(Enum):
+    Breakfast = 1
+    Main = 2
+    Side = 3
+    Dessert = 4
+
 
 class Ingredient(Base):
     __tablename__ = 'ingredient'
@@ -38,7 +44,7 @@ class Ingredient(Base):
         return {
             "Id": self.id,
             "Name": self.name,
-            "UnitType": self.unit_type,
+            "UnitType": UnitType(self.unit_type).name,
             "CategoryType": self.category_type
         }
 
@@ -99,6 +105,7 @@ class Recipe(Base):
     source = Column(String)
     prep_time = Column(Integer)
     total_time = Column(Integer)
+    type = Column(Integer)
 
     ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
     instructions = relationship("RecipeInstruction", back_populates="recipe", uselist=False,
@@ -121,8 +128,8 @@ class Recipe(Base):
             "PrepTime": self.prep_time,
             "TotalTime": self.total_time,
             "Nutrients": nutrients.get_for_display(),
-            "Instructions": [ins.get_for_display for ins in instructions],
-            "Ingredients": [ing.get_for_display for ing in ingredients]
+            "Instructions": [ins.get_for_display() for ins in instructions],
+            "Ingredients": [ing.get_for_display() for ing in ingredients]
         }
 
     def get_recipes(self):
@@ -320,9 +327,8 @@ class RecipeIngredient(Base):
 
     def get_for_display(self):
         ingredient = session.query(Ingredient).filter_by(id=self.ingredient_id).first()
-
+        print(self.ingredient_id)
         return {
-            "Id": self.id,
             "RecipeId": self.recipe_id,
             "Amount": self.amount,
             "Required": self.required,

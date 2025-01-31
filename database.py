@@ -7,12 +7,14 @@ engine = create_engine('sqlite:///meals.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 class UnitType(Enum):
     Whole = 1
     Milliliters = 2
     Grams = 3
     Teaspoon = 4
     TableSpoon = 5
+
 
 class Category(Enum):
     Meat = 1
@@ -22,6 +24,7 @@ class Category(Enum):
     Pantry = 5
     FridgeOther = 6
     Bread = 7
+
 
 class Ingredient(Base):
     __tablename__ = 'ingredient'
@@ -79,6 +82,7 @@ class Ingredient(Base):
         else:
             return []
 
+
 class Recipe(Base):
     __tablename__ = 'recipe'
 
@@ -89,9 +93,9 @@ class Recipe(Base):
     total_time = Column(Integer)
 
     ingredients = relationship("RecipeIngredient", back_populates="recipe", cascade="all, delete-orphan")
-    instructions = relationship("RecipeInstruction", back_populates="recipe", uselist=False, cascade="all, delete-orphan")
+    instructions = relationship("RecipeInstruction", back_populates="recipe", uselist=False,
+                                cascade="all, delete-orphan")
     nutrients = relationship("RecipeNutrient", back_populates="recipe", uselist=False, cascade="all, delete-orphan")
-
 
     def get_recipes(self):
         # Retrieve all recipes from the database
@@ -117,6 +121,23 @@ class Recipe(Base):
         session.add(new_recipe)
         session.commit()
         return new_recipe.id  # Return the ID of the newly added recipe
+
+    def update_recipe(self, id, name=None, source=None, prep_time=None, total_time=None):
+        recipe = session.query(Recipe).filter_by(id=id).first()
+        if not recipe:
+            raise ValueError(f"Recipe with ID {id} does not exist.")
+
+        if name:
+            recipe.name = name
+        if source:
+            recipe.source = source
+        if prep_time is not None:
+            recipe.prep_time = prep_time
+        if total_time is not None:
+            recipe.total_time = total_time
+
+        session.commit()
+        return recipe
 
     def remove_recipe(self, id):
         # Remove a recipe by ID from the database
@@ -173,6 +194,18 @@ class Recipe(Base):
         session.add(new_instruction)
         session.commit()
 
+    def update_instruction(self, recipe_id, new_instruction):
+        recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+        if not recipe:
+            raise ValueError(f"Recipe with ID {recipe_id} does not exist.")
+
+        if not recipe.instructions:
+            raise ValueError(f"No instructions found for Recipe ID {recipe_id}.")
+
+        recipe.instructions.text = new_instruction
+        session.commit()
+        return recipe.instructions
+
     def remove_instruction(self, recipe_id, step_number):
         # Find the instruction for the given step
         instruction = session.query(RecipeInstruction).filter_by(
@@ -207,7 +240,8 @@ class Recipe(Base):
 
     def get_all_steps(self):
         # Retrieve all steps for this recipe in order
-        recipe_instructions = session.query(RecipeInstruction).filter_by(recipe_id=self.id).order_by(RecipeInstruction.step_number.asc()).all()
+        recipe_instructions = session.query(RecipeInstruction).filter_by(recipe_id=self.id).order_by(
+            RecipeInstruction.step_number.asc()).all()
         return recipe_instructions
 
     def search(self, query):
@@ -221,6 +255,7 @@ class Recipe(Base):
             return recipes
         else:
             return []
+
 
 class RecipeIngredient(Base):
     __tablename__ = 'recipe_ingredient'
@@ -244,6 +279,7 @@ class RecipeInstruction(Base):
 
     recipe = relationship("Recipe", back_populates="instructions")
 
+
 class RecipeNutrient(Base):
     __tablename__ = 'recipe_nutrient'
 
@@ -258,6 +294,7 @@ class RecipeNutrient(Base):
     salt = Column(Integer)
 
     recipe = relationship("Recipe", back_populates="nutrients")
+
 
 # Creating an engine for the SQLite database
 engine = create_engine('sqlite:///meals.db')

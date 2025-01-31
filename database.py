@@ -127,6 +127,7 @@ class Recipe(Base):
             "Source": self.source,
             "PrepTime": self.prep_time,
             "TotalTime": self.total_time,
+            "Type": RecipeType(self.type).name,
             "Nutrients": nutrients.get_for_display(),
             "Instructions": [ins.get_for_display() for ins in instructions],
             "Ingredients": [ing.get_for_display() for ing in ingredients]
@@ -327,9 +328,9 @@ class RecipeIngredient(Base):
 
     def get_for_display(self):
         ingredient = session.query(Ingredient).filter_by(id=self.ingredient_id).first()
-        print(self.ingredient_id)
         return {
             "RecipeId": self.recipe_id,
+            "IngredientId": self.ingredient_id,
             "Amount": self.amount,
             "Required": self.required,
             "Ingredient": ingredient.get_for_display()

@@ -126,8 +126,9 @@
                         <div class="content">
                             <div class="head">
                                 <h4 class="mb-0">Ingredients</h4>
+                                <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add</button>
                             </div>
-                            <div class="canvas-wrapper" style="overflow-y:scroll; height:400px; display:block;">
+                            <div class="canvas-wrapper">
                                 <table class="table table-striped">
                                     <thead class="success">
                                         <tr>
@@ -151,8 +152,8 @@
                                                 No
                                                 {% endif %}
                                             </td>
-                                            <td>
-                                                EDIT HERE
+                                            <td class="text-end">
+                                               <button onclick="deleteIngredient({{recipe_ingredient['IngredientId']}})" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
                                             </td>
                                         </tr>
                                     {% endfor %}
@@ -168,81 +169,113 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade" id="createRecipeModal" tabindex="-1" aria-labelledby="createRecipeModalLabel" aria-hidden="true">
+<div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Recipe</h5>
+        <h5 class="modal-title" id="addIngredientModalLabel">Add Ingredient to Recipe</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="mb-3">
-            <label for="configName" class="form-label">Name</label>
-            <input id="configName" type="text" name="configName" placeholder="Recipe Name" class="form-control" required>
+            <label for="ingredientId" class="form-label">Ingredient</label>
+            <select id="ingredientId" type="number" placeholder="Ingredient" class="form-control" required onchange="onIngredientSelect()">
+                {% for ingredient in data["Ingredients"] %}
+                    <option value="{{ingredient['Id']}}">{{ingredient["Name"]}}</option>
+                {% endfor %}
+            </select>
         </div>
         <div class="mb-3">
-            <label for="configSource" class="form-label">Source</label>
-            <input id="configSource" type="text" name="configSource" placeholder="Recipe Source" class="form-control">
+            <label for="ingredientAmount" class="form-label">Amount</label>
+            <input id="ingredientAmount" type="number" placeholder="Amount" class="form-control" required>
+            <small id="unitTypeDes"></small>
         </div>
         <div class="mb-3">
-            <label for="configPrepTime" class="form-label">Prep Time (mins)</label>
-            <input id="configPrepTime" type="number" name="configPrepTime" placeholder="Preparation Time" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label for="configTotalTime" class="form-label">Total Time (mins)</label>
-            <input id="configTotalTime" type="number" name="configTotalTime" placeholder="Total Time" class="form-control">
+            <label for="ingredientRequired" class="form-label">Required</label>
+            <select id="ingredientRequired" class="form-select">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" onClick="addNewRecipe()" class="btn btn-primary">Add</button>
+        <button type="button" onClick="addIngredient()" class="btn btn-primary">Add Ingredient</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-   async function addNewRecipe() {
-       // Get input values
-       const name = document.getElementById("configName").value.trim();
-       const source = document.getElementById("configSource").value.trim();
-       const prepTime = document.getElementById("configPrepTime").value.trim();
-       const totalTime = document.getElementById("configTotalTime").value.trim();
+    ingredientUnitTypes = {}
+    {% for ingredient in data["Ingredients"] %}
+        ingredientUnitTypes[{{ingredient["Id"]}}] = '{{ingredient["UnitType"]}}';
+    {% endfor %}
 
-       // Validate required field (name)
-       if (!name) {
-           alert("Recipe name is required.");
+    function onIngredientSelect() {
+        const ingredientId = document.getElementById('ingredientId').value;
+        document.getElementById("unitTypeDes").innerText  = ingredientUnitTypes[ingredientId];
+    }
+
+   onIngredientSelect();
+
+   async function addIngredient() {
+       const ingredientId = document.getElementById('ingredientId').value;
+       const amount = document.getElementById('ingredientAmount').value;
+       const required = document.getElementById('ingredientRequired').value === 'true'; // Convert to boolean
+
+       if (!ingredientId || !amount) {
+           alert("Ingredient ID and Amount are required.");
            return;
        }
 
-       // Prepare request payload
-       const recipeData = {
-           name: name,
-           source: source || null,
-           prep_time: prepTime ? parseInt(prepTime) : null,
-           total_time: totalTime ? parseInt(totalTime) : null
-       };
-
        try {
-           const response = await fetch('/api/recipe', {
+           const response = await fetch(`/api/recipe/{{data['Recipe']['Id']}}/ingredient`, {
                method: 'POST',
                headers: {
                    'Content-Type': 'application/json'
                },
-               body: JSON.stringify(recipeData)
+               body: JSON.stringify({
+                   ingredient_id: ingredientId,
+                   amount: amount,
+                   required: required
+               })
            });
 
            const result = await response.json();
 
            if (response.ok) {
-               alert("Recipe added successfully!");
+               alert("Ingredient added successfully!");
+               location.reload(); // Refresh page to update the ingredient list
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           console.error("Failed to add ingredient:", error);
+           alert("An error occurred while adding the ingredient.");
+       }
+   }
+
+   async function deleteIngredient(ingredient_id) {
+       try {
+           const response = await fetch('/api/recipe/{{data["Recipe"]["Id"]}}/ingredient/'+ingredient_id, {
+               method: 'DELETE',
+               headers: {
+                   'Content-Type': 'application/json'
+               }
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               alert("Ingredient deleted successfully!");
                location.reload(); // Refresh page to update the table
            } else {
                alert("Error: " + result.error);
            }
        } catch (error) {
-           console.error("Failed to add recipe:", error);
-           alert("An error occurred while adding the recipe.");
+           console.error("Failed to delete ingredient from recipe:", error);
+           alert("An error occurred while removing ingredient from the recipe.");
        }
    }
 </script>

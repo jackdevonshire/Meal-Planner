@@ -6,6 +6,8 @@ app = Flask(__name__)
 """
 MAIN ROUTES
 """
+
+
 @app.route('/', methods=['GET'])
 def dashboard():
     recipes = Recipe().get_recipes()
@@ -13,6 +15,7 @@ def dashboard():
         "Recipes": [r.get_for_display() for r in recipes]
     }
     return render_template('dashboard.html', data=data)
+
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def recipe_page(recipe_id):
@@ -24,6 +27,7 @@ def recipe_page(recipe_id):
     }
     return render_template('recipe.html', data=data, editable=False)
 
+
 @app.route('/recipe/<recipe_id>/edit', methods=['GET'])
 def recipe_page_editable(recipe_id):
     recipe = Recipe().get_recipe(recipe_id).get_for_display()
@@ -33,9 +37,12 @@ def recipe_page_editable(recipe_id):
         "Ingredients": [ing.get_for_display() for ing in ingredients]
     }
     return render_template('recipe.html', data=data, editable=True)
+
+
 """
 API ENDPOINTS
 """
+
 
 @app.route('/api/recipes', methods=['GET'])
 def get_recipes():
@@ -86,6 +93,7 @@ def delete_recipe(id):
     session.commit()
     return jsonify({'message': 'Recipe deleted successfully'})
 
+
 @app.route('/api/recipe/<int:recipe_id>/ingredient', methods=['POST'])
 def add_ingredient_to_recipe(recipe_id):
     data = request.json
@@ -109,7 +117,8 @@ def add_ingredient_to_recipe(recipe_id):
         return jsonify({"error": f"Ingredient with ID {ingredient_id} not found"}), 404
 
     # Recipe Ingredient
-    recipe_ingredient = session.query(RecipeIngredient).filter_by(recipe_id=recipe_id, ingredient_id=ingredient_id).first()
+    recipe_ingredient = session.query(RecipeIngredient).filter_by(recipe_id=recipe_id,
+                                                                  ingredient_id=ingredient_id).first()
     if recipe_ingredient:
         return jsonify({"error": f"Recipe already has this ingredient!"}), 400
 
@@ -132,6 +141,8 @@ def add_ingredient_to_recipe(recipe_id):
         "amount": amount,
         "required": required
     }), 201
+
+
 @app.route('/api/recipe/<int:recipe_id>/ingredient/<int:ingredient_id>', methods=['DELETE'])
 def delete_recipe_ingredient(recipe_id, ingredient_id):
     instruction = session.query(RecipeIngredient).filter_by(recipe_id=recipe_id, ingredient_id=ingredient_id).first()
@@ -141,6 +152,32 @@ def delete_recipe_ingredient(recipe_id, ingredient_id):
     session.delete(instruction)
     session.commit()
     return jsonify({'message': 'Recipe ingredient deleted successfully'})
+
+
+@app.route('/api/recipe/<int:recipe_id>/step', methods=['POST'])
+def add_recipe_step(recipe_id):
+    data = request.json
+    recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+    recipe.add_instruction(data.get("Step"))
+    session.commit()
+    return jsonify({'message': 'Step added successfully'})
+
+
+@app.route('/api/recipe/<int:recipe_id>/step/<int:step_number>', methods=['DELETE'])
+def remove_recipe_step(recipe_id, step_number):
+    recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+    recipe.remove_instruction(step_number)
+    session.commit()
+    return jsonify({'message': 'Step removed successfully'})
+
+
+@app.route('/api/recipe/<int:recipe_id>/step/<int:step_number>/move/<amount>', methods=['PUT'])
+def move_recipe_step(recipe_id, step_number, amount):
+    recipe = session.query(Recipe).filter_by(id=recipe_id).first()
+    recipe.move_instruction(step_number, int(amount))
+    session.commit()
+    return jsonify({'message': 'Step moved successfully'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

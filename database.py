@@ -213,19 +213,16 @@ class Recipe(Base):
         else:
             raise ValueError(f"Ingredient with ID {ingredient_id} is not associated with this recipe.")
 
-    def add_instruction(self, step_number, instruction):
-        # Check if the step already exists
+    def add_instruction(self, instruction):
+        # Get maximum step number
         existing_instruction = session.query(RecipeInstruction).filter_by(
-            recipe_id=self.id,
-            step_number=step_number
-        ).first()
-        if existing_instruction:
-            raise ValueError(f"Step number {step_number} already exists for this recipe.")
+            recipe_id=self.id
+        ).order_by(RecipeInstruction.step_number.desc()).first()
 
         # Add the instruction to the recipe
         new_instruction = RecipeInstruction(
             recipe_id=self.id,
-            step_number=step_number,
+            step_number=existing_instruction.step_number + 1,
             instructions=instruction
         )
         session.add(new_instruction)
@@ -243,10 +240,10 @@ class Recipe(Base):
         session.commit()
         return recipe.instructions
 
-    def remove_instruction(self, recipe_id, step_number):
+    def remove_instruction(self, step_number):
         # Find the instruction for the given step
         instruction = session.query(RecipeInstruction).filter_by(
-            recipe_id=recipe_id,
+            recipe_id=self.id,
             step_number=step_number
         ).first()
         if instruction:
@@ -254,6 +251,40 @@ class Recipe(Base):
             session.commit()
         else:
             raise ValueError(f"Step number {step_number} does not exist for this recipe.")
+
+        # Now rejig all the step numbers
+        instructions = session.query(RecipeInstruction).filter_by(
+            recipe_id=self.id,
+            step_number=step_number
+        ).order_by(RecipeInstruction.step_number.asc()).all()
+        count = 1
+        for instruction in instructions:
+            instruction.step_number = count
+            count += 1
+
+        session.commit()
+
+    def move_instruction(self, step_number, amount):
+        instruction = session.query(RecipeInstruction).filter_by(
+            recipe_id=self.id,
+            step_number=step_number
+        ).first()
+
+        to_swap = session.query(RecipeInstruction).filter_by(
+            recipe_id=self.id,
+            step_number=step_number + amount
+        ).first()
+
+        print(instruction)
+        print(to_swap)
+        if not instruction or not to_swap:
+            return
+
+        instruction.step_number = to_swap.step_number
+        to_swap.step_number = step_number
+
+        session.commit()
+
 
     def update_nutrients(self, calories, fat, sat_fat, carbs, sugar, fibre, protein, salt):
         nutrients = session.query(RecipeNutrient).filter_by(

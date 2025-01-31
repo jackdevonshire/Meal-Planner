@@ -213,29 +213,33 @@
     <div class="card">
         <div class="card-header">
             Instructions
-            <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addStepModal"><i class="fas fa-plus-circle"></i> Add Step</button>
         </div>
 
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table">
                     <tbody>
-                                            MAKE SURE IF DELETE STEP, STEPS INBETWEEN GET UPDATED<br>
-                        ALSO NEED AN EDIT STEP FUNCTIONALITY<br>
-                        AND A MOVE STEP FUNCTIONALITY<br>
                         {% for step in data["Recipe"]["Instructions"] %}
                         <tr>
                             <td>
-                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-up"></i></button>
-                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-down"></i></button>
+                                <button onclick="moveStep({{step['StepNumber']}}, -1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-up"></i></button>
+                                <button onclick="moveStep({{step['StepNumber']}}, 1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-down"></i></button>
                             </td>
                             <td>{{step["Instructions"]}}</td>
                             <td>
-                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-pen"></i></button>
-                                <button onclick="TODO" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
+                                <button onclick="deleteStep({{step['StepNumber']}})" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     {% endfor %}
+                        <tr>
+                            <td></td>
+                            <td>
+                                <input class="form-control" id="newStep" type="textarea" placeholder="Add new step...">
+                            </td>
+                            <td>
+                                <button onclick="addNewStep()" class="btn btn-outline-info btn-rounded"><i class="fas fa-plus"></i></button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -295,6 +299,33 @@
 
    onIngredientSelect();
 
+   async function addNewStep() {
+        const newStep = document.getElementById("newStep").value;
+
+       try {
+           const response = await fetch(`/api/recipe/{{data['Recipe']['Id']}}/step`, {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({
+                   Step: newStep
+               })
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               location.reload(); // Refresh page to update the ingredient list
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           console.error("Failed to add step:", error);
+           alert("An error occurred while adding the step.");
+       }
+   }
+
    async function addIngredient() {
        const ingredientId = document.getElementById('ingredientId').value;
        const amount = document.getElementById('ingredientAmount').value;
@@ -321,14 +352,12 @@
            const result = await response.json();
 
            if (response.ok) {
-               alert("Ingredient added successfully!");
                location.reload(); // Refresh page to update the ingredient list
            } else {
                alert("Error: " + result.error);
            }
        } catch (error) {
-           console.error("Failed to add ingredient:", error);
-           alert("An error occurred while adding the ingredient.");
+           console.error( error);
        }
    }
 
@@ -344,14 +373,54 @@
            const result = await response.json();
 
            if (response.ok) {
-               alert("Ingredient deleted successfully!");
                location.reload(); // Refresh page to update the table
            } else {
                alert("Error: " + result.error);
            }
        } catch (error) {
-           console.error("Failed to delete ingredient from recipe:", error);
-           alert("An error occurred while removing ingredient from the recipe.");
+           console.error( error);
+       }
+   }
+
+   async function moveStep(stepId, amount) {
+       try {
+           const response = await fetch('/api/recipe/{{data["Recipe"]["Id"]}}/step/'+stepId+'/move/'+amount, {
+               method: 'PUT',
+               headers: {
+                   'Content-Type': 'application/json'
+               }
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               location.reload(); // Refresh page to update the table
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           console.error( error);
+       }
+   }
+
+   async function deleteStep(step_number) {
+       try {
+           const response = await fetch('/api/recipe/{{data["Recipe"]["Id"]}}/step/'+step_number, {
+               method: 'DELETE',
+               headers: {
+                   'Content-Type': 'application/json'
+               }
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               location.reload(); // Refresh page to update the table
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           console.error( error);
        }
    }
 </script>

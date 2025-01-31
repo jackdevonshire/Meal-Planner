@@ -9,12 +9,20 @@ MAIN ROUTES
 @app.route('/', methods=['GET'])
 def dashboard():
     recipes = Recipe().get_recipes()
-    print(recipes)
-    recipes = [{'Id': r.id, 'Name': r.name, 'Source': r.source, 'PrepTime': r.prep_time, 'TotalTime': r.total_time} for r in recipes]
     data = {
-        "Recipes": recipes
+        "Recipes": [r.get_for_display() for r in recipes]
     }
     return render_template('dashboard.html', data=data)
+
+@app.route('/recipe/<recipe_id>', methods=['GET'])
+def recipe_page(recipe_id):
+    recipe = Recipe().get_recipe(recipe_id).get_for_display()
+    ingredients = Ingredient().get_all_ingredients()
+    data = {
+        "Recipe": recipe,
+        "Ingredients": [ing.get_for_display() for ing in ingredients]
+    }
+    return render_template('recipe.html', data=data)
 
 """
 API ENDPOINTS

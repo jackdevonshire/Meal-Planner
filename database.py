@@ -34,6 +34,14 @@ class Ingredient(Base):
     unit_type = Column(Integer, nullable=False)
     category_type = Column(Integer, nullable=False)
 
+    def get_for_display(self):
+        return {
+            "Id": self.id,
+            "Name": self.name,
+            "UnitType": self.unit_type,
+            "CategoryType": self.category_type
+        }
+
     def get_all_ingredients(self):
         # Retrieve all ingredients from the database
         ingredients = session.query(Ingredient).all()
@@ -97,6 +105,26 @@ class Recipe(Base):
                                 cascade="all, delete-orphan")
     nutrients = relationship("RecipeNutrient", back_populates="recipe", uselist=False, cascade="all, delete-orphan")
 
+    def get_for_display(self):
+        nutrients = session.query(RecipeNutrient).filter_by(recipe_id=self.id).first()
+        instructions = session.query(RecipeInstruction).filter_by(recipe_id=self.id).order_by(RecipeInstruction.step_number.asc()).all()
+        ingredients = session.query(RecipeIngredient).filter_by(recipe_id=self.id)
+
+        if not nutrients:
+            self.update_nutrients(0, 0, 0, 0, 0, 0, 0, 0)
+            nutrients = session.query(RecipeNutrient).filter_by(recipe_id=self.id).first()
+
+        return {
+            "Id": self.id,
+            "Name": self.name,
+            "Source": self.source,
+            "PrepTime": self.prep_time,
+            "TotalTime": self.total_time,
+            "Nutrients": nutrients.get_for_display(),
+            "Instructions": [ins.get_for_display for ins in instructions],
+            "Ingredients": [ing.get_for_display for ing in ingredients]
+        }
+
     def get_recipes(self):
         # Retrieve all recipes from the database
         recipes = session.query(Recipe).all()
@@ -104,9 +132,9 @@ class Recipe(Base):
 
     def get_recipe(self, id):
         # Retrieve a specific recipe by ID, including its ingredients and instructions
-        recipe = session.query(Recipe).filter_by(id=id).first()
-        if recipe:
-            return recipe
+        r = session.query(Recipe).filter_by(id=id).first()
+        if r:
+            return r
         else:
             raise ValueError(f"Recipe with ID {id} does not exist.")
 
@@ -120,6 +148,7 @@ class Recipe(Base):
         )
         session.add(new_recipe)
         session.commit()
+        self.update_nutrients(0, 0, 0, 0, 0, 0, 0, 0)
         return new_recipe.id  # Return the ID of the newly added recipe
 
     def update_recipe(self, id, name=None, source=None, prep_time=None, total_time=None):
@@ -218,6 +247,27 @@ class Recipe(Base):
         else:
             raise ValueError(f"Step number {step_number} does not exist for this recipe.")
 
+    def update_nutrients(self, calories, fat, sat_fat, carbs, sugar, fibre, protein, salt):
+        nutrients = session.query(RecipeNutrient).filter_by(
+            recipe_id=self.id
+        ).first()
+        if nutrients:
+            session.delete(nutrients)
+
+        new_nutrients = RecipeNutrient(
+            recipe_id=self.id,
+            calories=calories,
+            fat=fat,
+            sat_fat=sat_fat,
+            carbs=carbs,
+            sugar=sugar,
+            fibre=fibre,
+            protein=protein,
+            salt=salt
+        )
+        session.add(new_nutrients)
+        session.commit()
+
     def get_all_ingredients(self):
         # Create an alias for the Ingredient table
         ingredient_alias = aliased(Ingredient)
@@ -268,6 +318,17 @@ class RecipeIngredient(Base):
     recipe = relationship("Recipe", back_populates="ingredients")
     ingredient = relationship("Ingredient")
 
+    def get_for_display(self):
+        ingredient = session.query(Ingredient).filter_by(id=self.ingredient_id).first()
+
+        return {
+            "Id": self.id,
+            "RecipeId": self.recipe_id,
+            "Amount": self.amount,
+            "Required": self.required,
+            "Ingredient": ingredient.get_for_display()
+        }
+
 
 class RecipeInstruction(Base):
     __tablename__ = 'recipe_instruction'
@@ -279,6 +340,13 @@ class RecipeInstruction(Base):
 
     recipe = relationship("Recipe", back_populates="instructions")
 
+    def get_for_display(self):
+        return {
+            "Id": self.id,
+            "RecipeId": self.recipe_id,
+            "StepNumber": self.step_number,
+            "Instructions": self.instructions
+        }
 
 class RecipeNutrient(Base):
     __tablename__ = 'recipe_nutrient'
@@ -294,6 +362,19 @@ class RecipeNutrient(Base):
     salt = Column(Integer)
 
     recipe = relationship("Recipe", back_populates="nutrients")
+
+    def get_for_display(self):
+        return {
+            "RecipeId": self.recipe_id,
+            "Calories": self.calories,
+            "Fat": self.fat,
+            "SatFat": self.sat_fat,
+            "Carbs": self.carbs,
+            "Sugar": self.sugar,
+            "Fibre": self.fibre,
+            "Protein": self.protein,
+            "Salt": self.salt
+        }
 
 
 # Creating an engine for the SQLite database

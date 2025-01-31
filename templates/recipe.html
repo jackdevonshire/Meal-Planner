@@ -26,7 +26,11 @@
                                 <div class="col-sm-8">
                                     <div class="detail">
                                         <p class="detail-subtitle">Prep Time</p>
+                                        {% if editable %}
+                                        <input type="number" value='{{data["Recipe"]["PrepTime"]}}'> mins
+                                        {% else %}
                                         <span class="number">{{data["Recipe"]["PrepTime"]}} mins</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -45,7 +49,11 @@
                                 <div class="col-sm-8">
                                     <div class="detail">
                                         <p class="detail-subtitle">Total Time</p>
+                                        {% if editable %}
+                                        <input type="number" value='{{data["Recipe"]["TotalTime"]}}'> mins
+                                        {% else %}
                                         <span class="number">{{data["Recipe"]["TotalTime"]}} mins</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -64,7 +72,11 @@
                                 <div class="col-sm-8">
                                     <div class="detail">
                                         <p class="detail-subtitle">Calories</p>
+                                        {% if editable %}
+                                        <input type="number" value='{{data["Recipe"]["Nutrients"]["Calories"]}}'> kcal
+                                        {% else %}
                                         <span class="number">{{data["Recipe"]["Nutrients"]["Calories"]}} kcal</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

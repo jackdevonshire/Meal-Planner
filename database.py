@@ -219,10 +219,15 @@ class Recipe(Base):
             recipe_id=self.id
         ).order_by(RecipeInstruction.step_number.desc()).first()
 
+        if existing_instruction:
+            existing_instruction.step_number + 1
+        else:
+            step_number = 1
+
         # Add the instruction to the recipe
         new_instruction = RecipeInstruction(
             recipe_id=self.id,
-            step_number=existing_instruction.step_number + 1,
+            step_number=step_number,
             instructions=instruction
         )
         session.add(new_instruction)

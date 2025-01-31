@@ -165,7 +165,7 @@
                             <div class="head">
                                 <h4 class="mb-0">
                                     Ingredients
-                                    <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add Ingredient</button>
+                                    <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add</button>
                                 </h4>
                             </div>
                             <div class="canvas-wrapper">
@@ -174,6 +174,7 @@
                                         <tr>
                                             <th>Ingredient</th>
                                             <th>Amount</th>
+                                            <th>Units</th>
                                             <th>Required</th>
                                             <th></th>
                                         </tr>
@@ -183,7 +184,10 @@
                                         <tr>
                                             <td>{{recipe_ingredient["Ingredient"]["Name"]}}</td>
                                             <td>
-                                                {{recipe_ingredient["Amount"]}} <small>{{recipe_ingredient["Ingredient"]["UnitType"]}}</small>
+                                                {{recipe_ingredient["Amount"]}}
+                                            </td>
+                                            <td>
+                                                <small>{{recipe_ingredient["Ingredient"]["UnitType"]}}</small>
                                             </td>
                                             <td>
                                                 {% if recipe_ingredient["Required"] == 0 %}

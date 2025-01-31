@@ -220,7 +220,7 @@ class Recipe(Base):
         ).order_by(RecipeInstruction.step_number.desc()).first()
 
         if existing_instruction:
-            existing_instruction.step_number + 1
+            step_number = existing_instruction.step_number + 1
         else:
             step_number = 1
 

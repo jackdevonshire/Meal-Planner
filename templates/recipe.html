@@ -77,7 +77,13 @@
                     <div class="card">
                         <div class="content">
                             <div class="head">
-                                <h4 class="mb-0">Nutrition (per meal)</h4>
+                                <h4 class="mb-0">Nutrition (per meal)
+                                    {% if editable %}
+                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" onclick="window.location.href = window.location.href.replace('/edit', '')"><i class="fas fa-pen"></i> Save</button>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" onclick="window.location.href = window.location.href+'/edit'"><i class="fas fa-pen"></i> Edit</button>
+                                    {% endif %}
+                                </h4>
                             </div>
                             <br>
                             <div class="canvas-wrapper">
@@ -85,35 +91,59 @@
                                     <tbody>
                                         <tr>
                                             <td>Calories</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Calories"]}} kcal</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Calories"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Calories"]}} {% endif %}
+                                                kcal</td>
                                         </tr>
                                         <tr>
                                             <td>Fat</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Fat"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Fat"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Fat"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Saturated Fat</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["SatFat"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["SatFat"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["SatFat"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Carbohydrates</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Carbs"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Carbs"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Carbs"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Sugar</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Sugar"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Sugar"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Sugar"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Fibre</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Fibre"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Fibre"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Fibre"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Protein</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Protein"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Protein"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Protein"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                         <tr>
                                             <td>Salt</td>
-                                            <td class="text-end">{{data["Recipe"]["Nutrients"]["Salt"]}} g</td>
+                                            <td class="text-end">
+                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Salt"]}}'>
+                                                {% else %} {{data["Recipe"]["Nutrients"]["Salt"]}} {% endif %}
+                                                g</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -125,8 +155,10 @@
                     <div class="card">
                         <div class="content">
                             <div class="head">
-                                <h4 class="mb-0">Ingredients</h4>
-                                <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add Ingredient</button>
+                                <h4 class="mb-0">
+                                    Ingredients
+                                    <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add Ingredient</button>
+                                </h4>
                             </div>
                             <div class="canvas-wrapper">
                                 <table class="table table-striped">

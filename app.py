@@ -22,8 +22,17 @@ def recipe_page(recipe_id):
         "Recipe": recipe,
         "Ingredients": [ing.get_for_display() for ing in ingredients]
     }
-    return render_template('recipe.html', data=data)
+    return render_template('recipe.html', data=data, editable=False)
 
+@app.route('/recipe/<recipe_id>/edit', methods=['GET'])
+def recipe_page_editable(recipe_id):
+    recipe = Recipe().get_recipe(recipe_id).get_for_display()
+    ingredients = Ingredient().get_all_ingredients()
+    data = {
+        "Recipe": recipe,
+        "Ingredients": [ing.get_for_display() for ing in ingredients]
+    }
+    return render_template('recipe.html', data=data, editable=True)
 """
 API ENDPOINTS
 """

@@ -126,7 +126,7 @@
                         <div class="content">
                             <div class="head">
                                 <h4 class="mb-0">Ingredients</h4>
-                                <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add</button>
+                                <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add Ingredient</button>
                             </div>
                             <div class="canvas-wrapper">
                                 <table class="table table-striped">
@@ -165,6 +165,39 @@
                 </div>
             </div>
       </div>
+<div class="col-md-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            Instructions
+            <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addStepModal"><i class="fas fa-plus-circle"></i> Add Step</button>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <tbody>
+                                            MAKE SURE IF DELETE STEP, STEPS INBETWEEN GET UPDATED<br>
+                        ALSO NEED AN EDIT STEP FUNCTIONALITY<br>
+                        AND A MOVE STEP FUNCTIONALITY<br>
+                        {% for step in data["Recipe"]["Instructions"] %}
+                        <tr>
+                            <td>
+                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-up"></i></button>
+                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-down"></i></button>
+                            </td>
+                            <td>{{step["Instructions"]}}</td>
+                            <td>
+                                <button onclick="TODO" class="btn btn-outline-info btn-rounded"><i class="fas fa-pen"></i></button>
+                                <button onclick="TODO" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
    </div>
 </div>
 
@@ -205,7 +238,6 @@
     </div>
   </div>
 </div>
-
 <script>
     ingredientUnitTypes = {}
     {% for ingredient in data["Ingredients"] %}

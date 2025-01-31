@@ -77,36 +77,6 @@ def delete_recipe(id):
     session.commit()
     return jsonify({'message': 'Recipe deleted successfully'})
 
-
-@app.route('/api/recipe/<int:id>/instruction', methods=['POST'])
-def add_instruction(id):
-    data = request.json
-    instruction = RecipeInstruction(recipe_id=id, step_number=data['step_number'], instructions=data['instructions'])
-    session.add(instruction)
-    session.commit()
-    return jsonify({'message': 'Instruction added successfully'})
-
-
-@app.route('/api/recipe/<int:id>/instruction/<int:step>', methods=['PUT'])
-def update_instruction(id, step):
-    data = request.json
-    instruction = session.query(RecipeInstruction).filter_by(recipe_id=id, step_number=step).first()
-    if not instruction:
-        return jsonify({'error': 'Instruction not found'}), 404
-    instruction.instructions = data['instructions']
-    session.commit()
-    return jsonify({'message': 'Instruction updated successfully'})
-
-
-@app.route('/api/recipe/<int:id>/instruction/<int:step>', methods=['DELETE'])
-def delete_instruction(id, step):
-    instruction = session.query(RecipeInstruction).filter_by(recipe_id=id, step_number=step).first()
-    if not instruction:
-        return jsonify({'error': 'Instruction not found'}), 404
-    session.delete(instruction)
-    session.commit()
-    return jsonify({'message': 'Instruction deleted successfully'})
-
 @app.route('/api/recipe/<int:recipe_id>/ingredient', methods=['POST'])
 def add_ingredient_to_recipe(recipe_id):
     data = request.json

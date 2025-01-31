@@ -62,34 +62,75 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-         <div class="mb-3">
+        <div class="mb-3">
             <label for="configName" class="form-label">Name</label>
-            <input id="configName" type="text" name="configName" placeholder="Configuration Name" class="form-control" required="">
-         </div>
-         <div class="mb-3">
-            <label for="configDescription" class="form-label">Description</label>
-            <textarea id="configDescription" type="text" name="configDescription" placeholder="Configuration Description" class="form-control" required=""></textarea>
-         </div>
+            <input id="configName" type="text" name="configName" placeholder="Recipe Name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="configSource" class="form-label">Source</label>
+            <input id="configSource" type="text" name="configSource" placeholder="Recipe Source" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="configPrepTime" class="form-label">Prep Time (mins)</label>
+            <input id="configPrepTime" type="number" name="configPrepTime" placeholder="Preparation Time" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="configTotalTime" class="form-label">Total Time (mins)</label>
+            <input id="configTotalTime" type="number" name="configTotalTime" placeholder="Total Time" class="form-control">
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" onClick="createConfiguration()" class="btn btn-primary">Create</button>
+        <button type="button" onClick="addNewRecipe()" class="btn btn-primary">Add</button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-   async function createConfiguration() {
-   }
+   async function addNewRecipe() {
+       // Get input values
+       const name = document.getElementById("configName").value.trim();
+       const source = document.getElementById("configSource").value.trim();
+       const prepTime = document.getElementById("configPrepTime").value.trim();
+       const totalTime = document.getElementById("configTotalTime").value.trim();
 
-   async function removeConfiguration(id) {
-   }
+       // Validate required field (name)
+       if (!name) {
+           alert("Recipe name is required.");
+           return;
+       }
 
-   async function changeIp() {
-   }
+       // Prepare request payload
+       const recipeData = {
+           name: name,
+           source: source || null,
+           prep_time: prepTime ? parseInt(prepTime) : null,
+           total_time: totalTime ? parseInt(totalTime) : null
+       };
 
-   async function changeConfiguration() {
+       try {
+           const response = await fetch('/api/recipe', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               body: JSON.stringify(recipeData)
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               alert("Recipe added successfully!");
+               location.reload(); // Refresh page to update the table
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           console.error("Failed to add recipe:", error);
+           alert("An error occurred while adding the recipe.");
+       }
    }
 </script>
+
 {% endblock %}

@@ -38,7 +38,7 @@ def get_recipe(id):
 @app.route('/api/recipe', methods=['POST'])
 def add_recipe():
     data = request.json
-    new_recipe = Recipe(name=data('name'), source=data.get('source'), prep_time=data.get('prep_time'),
+    new_recipe = Recipe(name=data.get('name'), source=data.get('source'), prep_time=data.get('prep_time'),
                         total_time=data.get('total_time'))
     session.add(new_recipe)
     session.commit()

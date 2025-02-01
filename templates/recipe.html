@@ -165,7 +165,6 @@
                             <div class="head">
                                 <h4 class="mb-0">
                                     Ingredients
-                                    <button class="btn btn-sm btn-outline-primary float-end" type="button" data-bs-toggle="modal" data-bs-target="#addIngredientModal"><i class="fas fa-plus-circle"></i> Add</button>
                                 </h4>
                             </div>
                             <div class="canvas-wrapper">
@@ -201,6 +200,31 @@
                                             </td>
                                         </tr>
                                     {% endfor %}
+                                        <tr>
+                                            <td>
+                                                <select id="ingredientSelect" class="form-control" onchange="onIngredientSelect()">
+                                                    <option></option>
+                                                    {% for ingredient in data["Ingredients"] %}
+                                                        <option value="{{ingredient['Id']}}">{{ingredient["Name"]}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="ingredientAmount" type="number" placeholder="Amount" class="form-control" required>
+                                            </td>
+                                            <td>
+                                                <small id="unitTypeDes"></small>
+                                            </td>
+                                            <td>
+                                                <select id="ingredientRequired" class="form-select">
+                                                    <option value="true">Yes</option>
+                                                    <option value="false">No</option>
+                                                </select>
+                                            </td>
+                                            <td class="text-end">
+                                               <button onClick="addIngredient()" class="btn btn-outline-info btn-rounded"><i class="fas fa-plus"></i></button>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -249,55 +273,36 @@
    </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="addIngredientModal" tabindex="-1" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addIngredientModalLabel">Add Ingredient to Recipe</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-            <label for="ingredientId" class="form-label">Ingredient</label>
-            <select id="ingredientId" type="number" placeholder="Ingredient" class="form-control" required onchange="onIngredientSelect()">
-                {% for ingredient in data["Ingredients"] %}
-                    <option value="{{ingredient['Id']}}">{{ingredient["Name"]}}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="ingredientAmount" class="form-label">Amount</label>
-            <input id="ingredientAmount" type="number" placeholder="Amount" class="form-control" required>
-            <small id="unitTypeDes"></small>
-        </div>
-        <div class="mb-3">
-            <label for="ingredientRequired" class="form-label">Required</label>
-            <select id="ingredientRequired" class="form-select">
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-            </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" onClick="addIngredient()" class="btn btn-primary">Add Ingredient</button>
-      </div>
-    </div>
-  </div>
-</div>
 <script>
+    // Get values from Python into JS
+    ingredients = {}
     ingredientUnitTypes = {}
     {% for ingredient in data["Ingredients"] %}
+        ingredients['{{ingredient["Name"]}}'] = '{{ingredient["Id"]}}'
         ingredientUnitTypes[{{ingredient["Id"]}}] = '{{ingredient["UnitType"]}}';
     {% endfor %}
 
+    // Adjusts unit type when adding an ingredient
     function onIngredientSelect() {
-        const ingredientId = document.getElementById('ingredientId').value;
-        document.getElementById("unitTypeDes").innerText  = ingredientUnitTypes[ingredientId];
+        const ingredientId = document.getElementById('ingredientSelect').value;
+        if (ingredientId) {
+            document.getElementById("unitTypeDes").innerText  = ingredientUnitTypes[ingredientId]
+        } else {
+            document.getElementById("unitTypeDes").innerText  = ""
+        }
     }
 
-   onIngredientSelect();
+    onIngredientSelect()
+
+    // Initialise Select2 dropdown for selecting an ingredient to add
+    $(document).ready(function() {
+        // Initialize Select2
+        $('#ingredientSelect').select2({
+            placeholder: "Select an ingredient",
+            allowClear: true,
+            width: '100%'
+        });
+    });
 
    async function addNewStep() {
         const newStep = document.getElementById("newStep").value;
@@ -327,9 +332,13 @@
    }
 
    async function addIngredient() {
-       const ingredientId = document.getElementById('ingredientId').value;
+       const ingredientId = document.getElementById('ingredientSelect').value;
        const amount = document.getElementById('ingredientAmount').value;
        const required = document.getElementById('ingredientRequired').value === 'true'; // Convert to boolean
+
+       if (!(ingredientId && amount)) {
+            return;
+       }
 
        if (!ingredientId || !amount) {
            alert("Ingredient ID and Amount are required.");

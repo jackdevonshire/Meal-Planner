@@ -51,7 +51,7 @@ def shopping():
     data = {
         "AllRecipes": [r.get_for_display() for r in all_recipes],
         "Recipes": cart.get_recipes(),
-        "Items": None
+        "Ingredients": cart.get_required_ingredients()
     }
     return render_template('shopping.html', data=data, editable=True)
 

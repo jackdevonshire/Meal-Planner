@@ -78,12 +78,12 @@
          </div>
          <div class="box box-primary">
             <div class="box-body">
-               <table class="table">
+               <table class="table" style="border: none !important;">
                  <thead>
                      <tr>
-                         <th></th>
-                         <th></th>
-                         <th></th>
+                         <th style="border: none !important;"></th>
+                         <th style="border: none !important;"></th>
+                         <th style="border: none !important;"></th>
                      </tr>
                  </thead>
                  <tbody>
@@ -91,16 +91,16 @@
                   {% if ingredients|length > 0 %}
                   <tr>
                      <h4>
-                        <td colspan="3">
+                        <td  style="border: none !important;" colspan="3">
                            <h4>{{category}}</h4>
                         </td>
                      </h4>
                   </tr>
                   {% for ingredient in ingredients %}
                   <tr>
-                      <td>{{ingredient["Name"]}}</td>
-                      <td>{{ingredient["Amount"]}} <small>{{ingredient["Unit"]}}</small></td>
-                      <td>{{ingredient["Required"]}}</td>
+                      <td style="border: none !important;">{{ingredient["Name"]}}</td>
+                      <td style="border: none !important;">{{ingredient["Amount"]}} <small>{{ingredient["Unit"]}}</small></td>
+                      <td style="border: none !important;">{{ingredient["Required"]}}</td>
                   </tr>
                   {% endfor %}
                   {% endif %}

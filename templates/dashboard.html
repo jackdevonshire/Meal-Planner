@@ -33,7 +33,11 @@
                               {% for recipe in data['Recipes'] %}
                                  <tr class="odd">
                                     <td>{{recipe['Id']}}</td>
-                                    <td>{{recipe['Name']}}</td>
+                                    <td>
+                                        <a href="{{ url_for('recipe_page', recipe_id=recipe['Id']) }}">
+                                        {{recipe['Name']}}
+                                        </a>
+                                    </td>
                                     <td>{{recipe['Source']}}</td>
                                     <td>{{recipe['PrepTime']}}</td>
                                     <td>{{recipe['TotalTime']}}</td>

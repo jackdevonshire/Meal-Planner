@@ -79,6 +79,10 @@ class Ingredient(Base):
         # Remove an ingredient by ID from the database
         ingredient = session.query(Ingredient).filter_by(id=id).first()
         if ingredient:
+            recipes = session.query(RecipeIngredient).filter_by(ingredient_id=ingredient.id).all()
+            if len(recipes) > 0:
+                raise ValueError("Remove ingredient from recipes before removing!")
+
             session.delete(ingredient)
             session.commit()
         else:
@@ -177,13 +181,16 @@ class Recipe(Base):
         return recipe
 
     def remove_recipe(self, id):
-        # Remove a recipe by ID from the database
-        recipe = session.query(Recipe).filter_by(id=id).first()
-        if recipe:
-            session.delete(recipe)
-            session.commit()
-        else:
-            raise ValueError(f"Recipe with ID {id} does not exist.")
+        to_remove = []
+        to_remove += session.query(RecipeIngredient).filter_by(recipe_id=id).all()
+        to_remove += session.query(RecipeNutrient).filter_by(recipe_id=id).all()
+        to_remove += session.query(RecipeInstruction).filter_by(recipe_id=id).all()
+        to_remove += session.query(Recipe).filter_by(id=id).all()
+
+        for item in to_remove:
+            session.delete(item)
+
+        session.commit()
 
     def add_ingredient(self, ingredient_id, amount, required):
         # Check if the ingredient exists

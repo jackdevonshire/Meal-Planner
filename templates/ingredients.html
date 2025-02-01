@@ -110,7 +110,7 @@
            if (response.ok) {
                location.reload(); // Refresh page to update the table
            } else {
-               alert("Error: " + result.error);
+               alert("Remove ingredient from recipes first!");
            }
        } catch (error) {
            console.error("Failed to delete ingredient:", error);

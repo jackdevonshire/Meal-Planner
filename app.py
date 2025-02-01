@@ -93,11 +93,7 @@ def update_recipe(id):
 
 @app.route('/api/recipe/<int:id>', methods=['DELETE'])
 def delete_recipe(id):
-    recipe = session.query(Recipe).filter_by(id=id).first()
-    if not recipe:
-        return jsonify({'error': 'Recipe not found'}), 404
-    session.delete(recipe)
-    session.commit()
+    Recipe().remove_recipe(id)
     return jsonify({'message': 'Recipe deleted successfully'})
 
 
@@ -193,7 +189,10 @@ def add_ingredient():
 
 @app.route('/api/ingredient/<ingredient_id>', methods=['DELETE'])
 def remove_ingredient(ingredient_id):
-    Ingredient().remove_ingredient(ingredient_id)
+    try:
+        Ingredient().remove_ingredient(ingredient_id)
+    except:
+        return jsonify({'message': 'Remove ingredient from recipes first!'}), 400
     return jsonify({'message': 'Ingredient removed successfully'})
 
 if __name__ == '__main__':

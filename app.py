@@ -57,7 +57,7 @@ def get_recipes():
     return jsonify([{'id': r.id, 'name': r.name, 'source': r.source} for r in recipes])
 
 
-@app.route('/api//recipe/<int:id>', methods=['GET'])
+@app.route('/api/recipe/<int:id>', methods=['GET'])
 def get_recipe(id):
     recipe = session.query(Recipe).filter_by(id=id).first()
     if not recipe:
@@ -185,6 +185,16 @@ def move_recipe_step(recipe_id, step_number, amount):
     session.commit()
     return jsonify({'message': 'Step moved successfully'})
 
+@app.route('/api/ingredient', methods=['POST'])
+def add_ingredient():
+    data = request.json
+    Ingredient().add_ingredient(data.get('name'), data.get('unitType'), data.get('categoryType'))
+    return jsonify({'message': 'Ingredient added successfully'})
+
+@app.route('/api/ingredient/<ingredient_id>', methods=['DELETE'])
+def remove_ingredient(ingredient_id):
+    Ingredient().remove_ingredient(ingredient_id)
+    return jsonify({'message': 'Ingredient removed successfully'})
 
 if __name__ == '__main__':
     app.run(debug=True)

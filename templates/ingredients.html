@@ -22,7 +22,6 @@
                      <div class="col-sm-12">
                         <table width="100%" class="table table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                            <thead>
-                             <th>Id</th>
                              <th>Name</th>
                              <th>Unit</th>
                              <th>Category</th>
@@ -31,7 +30,6 @@
                            <tbody>
                               {% for ingredient in data['Ingredients'] %}
                                  <tr class="odd">
-                                    <td>{{ingredient['Id']}}</td>
                                     <td>{{ingredient['Name']}}</td>
                                     <td>{{ingredient['UnitType']}}</td>
                                     <td>{{ingredient['CategoryType']}}</td>
@@ -140,6 +138,16 @@
            alert("An error occurred while adding the recipe.");
        }
    }
+
+   // Initialize DataTable
+   $(document).ready(function() {
+      $('#dataTables-example').DataTable({
+         "paging": true,        // Enable pagination
+         "searching": true,     // Enable searching
+         "info": true,          // Display table info (e.g., "Showing 1 to 10 of 50 entries")
+         "pageLength": 25,      // Set default number of rows per page (e.g., 10 rows per page)
+      });
+   });
 </script>
 
 {% endblock %}

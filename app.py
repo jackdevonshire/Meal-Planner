@@ -79,15 +79,8 @@ def add_recipe():
 @app.route('/api/recipe/<int:id>', methods=['PUT'])
 def update_recipe(id):
     data = request.json
-    recipe = session.query(Recipe).filter_by(id=id).first()
-    if not recipe:
-        return jsonify({'error': 'Recipe not found'}), 404
+    Recipe().update_recipe(id, data.get('name'), data.get('source'), data.get('prepTime'), data.get('totalTime'))
 
-    recipe.name = data.get('name', recipe.name)
-    recipe.source = data.get('source', recipe.source)
-    recipe.prep_time = data.get('prep_time', recipe.prep_time)
-    recipe.total_time = data.get('total_time', recipe.total_time)
-    session.commit()
     return jsonify({'message': 'Recipe updated successfully'})
 
 
@@ -196,4 +189,4 @@ def remove_ingredient(ingredient_id):
     return jsonify({'message': 'Ingredient removed successfully'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8080)

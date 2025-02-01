@@ -168,6 +168,8 @@ class Recipe(Base):
         if not recipe:
             raise ValueError(f"Recipe with ID {id} does not exist.")
 
+        print(name, source, prep_time, total_time)
+
         if name:
             recipe.name = name
         if source:

@@ -11,7 +11,11 @@
       </div>
       <div class="container">
          <div class="page-title">
+             {% if editable %}
+            <input type="text" id="name" class="form-control" value='{{data["Recipe"]["Name"]}}'>
+             {% else %}
             <h3>{{data["Recipe"]["Name"]}}</h3>
+             {% endif %}
          </div>
             <div class="row">
                 <div class="col-sm-6 col-md-6 col-lg-4 mt-4">
@@ -27,7 +31,7 @@
                                     <div class="detail">
                                         <p class="detail-subtitle">Prep Time</p>
                                         {% if editable %}
-                                        <input type="number" value='{{data["Recipe"]["PrepTime"]}}'> mins
+                                        <input type="number" id="prepTime" value='{{data["Recipe"]["PrepTime"]}}'> mins
                                         {% else %}
                                         <span class="number">{{data["Recipe"]["PrepTime"]}} mins</span>
                                         {% endif %}
@@ -50,7 +54,7 @@
                                     <div class="detail">
                                         <p class="detail-subtitle">Total Time</p>
                                         {% if editable %}
-                                        <input type="number" value='{{data["Recipe"]["TotalTime"]}}'> mins
+                                        <input id="totalTime" type="number" value='{{data["Recipe"]["TotalTime"]}}'> mins
                                         {% else %}
                                         <span class="number">{{data["Recipe"]["TotalTime"]}} mins</span>
                                         {% endif %}
@@ -66,13 +70,17 @@
                             <div class="row">
                                 <div class="col-sm-4">
                                     <div class="icon-big text-center">
-                                        <i class="teal fas fa-heart"></i>
+                                        <i class="teal fas fa-globe"></i>
                                     </div>
                                 </div>
                                 <div class="col-sm-8">
                                     <div class="detail">
-                                        <p class="detail-subtitle">Calories</p>
-                                        <span class="number">{{data["Recipe"]["Nutrients"]["Calories"]}} kcal</span>
+                                        <p class="detail-subtitle">Source</p>
+                                        {% if editable %}
+                                        <input id="source" type="text" value='{{data["Recipe"]["Source"]}}'>
+                                        {% else %}
+                                        <span class="number">{{data["Recipe"]["Source"]}}</span>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -87,7 +95,7 @@
                             <div class="head">
                                 <h4 class="mb-0">Nutrition (per meal)
                                     {% if editable %}
-                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" onclick="window.location.href = window.location.href.replace('/edit', '')"><i class="fas fa-pen"></i> Save</button>
+                                        <button class="btn btn-sm btn-outline-primary float-end" type="button" onclick="updateRecipe();"><i class="fas fa-pen"></i> Save</button>
                                     {% else %}
                                         <button class="btn btn-sm btn-outline-primary float-end" type="button" onclick="window.location.href = window.location.href+'/edit'"><i class="fas fa-pen"></i> Edit</button>
                                     {% endif %}
@@ -233,43 +241,43 @@
                 </div>
             </div>
       </div>
-<div class="col-md-12 col-lg-12">
-    <div class="card">
-        <div class="card-header">
-            Instructions
-        </div>
+        <div class="col-md-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    Instructions
+                </div>
 
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table">
-                    <tbody>
-                        {% for step in data["Recipe"]["Instructions"] %}
-                        <tr>
-                            <td>
-                                <button onclick="moveStep({{step['StepNumber']}}, -1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-up"></i></button>
-                                <button onclick="moveStep({{step['StepNumber']}}, 1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-down"></i></button>
-                            </td>
-                            <td>{{step["Instructions"]}}</td>
-                            <td>
-                                <button onclick="deleteStep({{step['StepNumber']}})" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                        <tr>
-                            <td></td>
-                            <td>
-                                <input class="form-control" id="newStep" type="textarea" placeholder="Add new step...">
-                            </td>
-                            <td>
-                                <button onclick="addNewStep()" class="btn btn-outline-info btn-rounded"><i class="fas fa-plus"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                {% for step in data["Recipe"]["Instructions"] %}
+                                <tr>
+                                    <td>
+                                        <button onclick="moveStep({{step['StepNumber']}}, -1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-up"></i></button>
+                                        <button onclick="moveStep({{step['StepNumber']}}, 1)" class="btn btn-outline-info btn-rounded"><i class="fas fa-arrow-down"></i></button>
+                                    </td>
+                                    <td>{{step["Instructions"]}}</td>
+                                    <td>
+                                        <button onclick="deleteStep({{step['StepNumber']}})" class="btn btn-outline-danger btn-rounded"><i class="fas fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <input class="form-control" id="newStep" type="textarea" placeholder="Add new step...">
+                                    </td>
+                                    <td>
+                                        <button onclick="addNewStep()" class="btn btn-outline-info btn-rounded"><i class="fas fa-plus"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
    </div>
 </div>
 
@@ -303,6 +311,43 @@
             width: '100%'
         });
     });
+
+    async function updateRecipe() {
+        const name = document.getElementById('name').value;
+        const prepTime = document.getElementById('prepTime').value;
+        const totalTime = document.getElementById('totalTime').value;
+        const source = document.getElementById('source').value;
+
+       try {
+           const response = await fetch(`/api/recipe/{{data['Recipe']['Id']}}`, {
+               method: 'PUT',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({
+                   name: name,
+                   prepTime: prepTime,
+                   totalTime: totalTime,
+                   source: source
+               })
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               location.reload(); // Refresh page to update the recipe
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           return;
+           console.error("Failed to update recipe: ", error);
+           alert("Failed to update recipe: ", error);
+       }
+
+        window.location.href = window.location.href.replace('/edit', '')
+    }
+
 
    async function addNewStep() {
         const newStep = document.getElementById("newStep").value;

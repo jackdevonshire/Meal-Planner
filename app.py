@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from database import session, Recipe, Ingredient, RecipeInstruction, RecipeIngredient
-
+from shopping import cart
 app = Flask(__name__)
 
 """
@@ -45,11 +45,29 @@ def recipe_page_editable(recipe_id):
     }
     return render_template('recipe.html', data=data, editable=True)
 
+@app.route('/shopping', methods=['GET'])
+def shopping():
+    all_recipes = Recipe().get_recipes()
+    data = {
+        "AllRecipes": [r.get_for_display() for r in all_recipes],
+        "Recipes": cart.get_recipes(),
+        "Items": None
+    }
+    return render_template('shopping.html', data=data, editable=True)
 
 """
 API ENDPOINTS
 """
 
+@app.route('/api/cart/<recipe_id>', methods=['DELETE'])
+def remove_recipe_from_cart(recipe_id):
+    cart.remove_from_cart(recipe_id)
+    return jsonify({'message': 'Recipe removed from cart'})
+
+@app.route('/api/cart/<recipe_id>', methods=['PUT'])
+def add_recipe_to_cart(recipe_id):
+    cart.add_to_cart(recipe_id)
+    return jsonify({'message': 'Recipe added to cart'})
 
 @app.route('/api/recipes', methods=['GET'])
 def get_recipes():

@@ -16,6 +16,15 @@ def dashboard():
     }
     return render_template('dashboard.html', data=data)
 
+@app.route('/ingredients', methods=['GET'])
+def ingredients():
+    ingredients = Ingredient().get_all_ingredients()
+    recipes = Recipe().get_recipes()
+    data = {
+        "Ingredients": [i.get_for_display() for i in ingredients],
+        "Recipes": [r.get_for_display() for r in recipes]
+    }
+    return render_template('ingredients.html', data=data)
 
 @app.route('/recipe/<recipe_id>', methods=['GET'])
 def recipe_page(recipe_id):

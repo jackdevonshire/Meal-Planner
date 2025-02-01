@@ -45,12 +45,12 @@ class Ingredient(Base):
             "Id": self.id,
             "Name": self.name,
             "UnitType": UnitType(self.unit_type).name,
-            "CategoryType": self.category_type
+            "CategoryType": Category(self.category_type).name
         }
 
     def get_all_ingredients(self):
         # Retrieve all ingredients from the database
-        ingredients = session.query(Ingredient).all()
+        ingredients = session.query(Ingredient).order_by(Ingredient.category_type.asc(), Ingredient.name.asc()).all()
         return ingredients
 
     def get_ingredient(self, id):
@@ -280,8 +280,6 @@ class Recipe(Base):
             step_number=step_number + amount
         ).first()
 
-        print(instruction)
-        print(to_swap)
         if not instruction or not to_swap:
             return
 

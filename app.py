@@ -83,6 +83,20 @@ def update_recipe(id):
 
     return jsonify({'message': 'Recipe updated successfully'})
 
+@app.route('/api/recipe/<int:id>/nutrients', methods=['PUT'])
+def update_recipe_nutrients(id):
+    data = request.json
+    recipe = session.query(Recipe).filter_by(id=id).first()
+    recipe.update_nutrients(data.get('calories'),
+                            data.get('fat'),
+                            data.get('satFat'),
+                            data.get('carbs'),
+                            data.get('sugar'),
+                            data.get('fibre'),
+                            data.get('protein'),
+                            data.get('salt'),)
+
+    return jsonify({'message': 'Recipe updated successfully'})
 
 @app.route('/api/recipe/<int:id>', methods=['DELETE'])
 def delete_recipe(id):
@@ -187,6 +201,7 @@ def remove_ingredient(ingredient_id):
     except:
         return jsonify({'message': 'Remove ingredient from recipes first!'}), 400
     return jsonify({'message': 'Ingredient removed successfully'})
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8080)

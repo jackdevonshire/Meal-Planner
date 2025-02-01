@@ -108,56 +108,56 @@
                                         <tr>
                                             <td>Calories</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Calories"]}}'>
+                                                {% if editable %} <input id='calories' type="number" value='{{data["Recipe"]["Nutrients"]["Calories"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Calories"]}} {% endif %}
                                                 kcal</td>
                                         </tr>
                                         <tr>
                                             <td>Fat</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Fat"]}}'>
+                                                {% if editable %} <input id='fat' type="number" value='{{data["Recipe"]["Nutrients"]["Fat"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Fat"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Saturated Fat</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["SatFat"]}}'>
+                                                {% if editable %} <input id='satFat' type="number" value='{{data["Recipe"]["Nutrients"]["SatFat"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["SatFat"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Carbohydrates</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Carbs"]}}'>
+                                                {% if editable %} <input id='carbs' type="number" value='{{data["Recipe"]["Nutrients"]["Carbs"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Carbs"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Sugar</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Sugar"]}}'>
+                                                {% if editable %} <input id='sugar' type="number" value='{{data["Recipe"]["Nutrients"]["Sugar"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Sugar"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Fibre</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Fibre"]}}'>
+                                                {% if editable %} <input id='fibre' type="number" value='{{data["Recipe"]["Nutrients"]["Fibre"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Fibre"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Protein</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Protein"]}}'>
+                                                {% if editable %} <input id='protein' type="number" value='{{data["Recipe"]["Nutrients"]["Protein"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Protein"]}} {% endif %}
                                                 g</td>
                                         </tr>
                                         <tr>
                                             <td>Salt</td>
                                             <td class="text-end">
-                                                {% if editable %} <input type="number" value='{{data["Recipe"]["Nutrients"]["Salt"]}}'>
+                                                {% if editable %} <input id='salt' type="number" value='{{data["Recipe"]["Nutrients"]["Salt"]}}'>
                                                 {% else %} {{data["Recipe"]["Nutrients"]["Salt"]}} {% endif %}
                                                 g</td>
                                         </tr>
@@ -318,6 +318,15 @@
         const totalTime = document.getElementById('totalTime').value;
         const source = document.getElementById('source').value;
 
+        const calories = document.getElementById('calories').value;
+        const fat = document.getElementById('fat').value;
+        const satFat = document.getElementById('satFat').value;
+        const carbs = document.getElementById('carbs').value;
+        const sugar = document.getElementById('sugar').value;
+        const fibre = document.getElementById('fibre').value;
+        const protein = document.getElementById('protein').value;
+        const salt = document.getElementById('salt').value;
+
        try {
            const response = await fetch(`/api/recipe/{{data['Recipe']['Id']}}`, {
                method: 'PUT',
@@ -329,6 +338,37 @@
                    prepTime: prepTime,
                    totalTime: totalTime,
                    source: source
+               })
+           });
+
+           const result = await response.json();
+
+           if (response.ok) {
+               location.reload(); // Refresh page to update the recipe
+           } else {
+               alert("Error: " + result.error);
+           }
+       } catch (error) {
+           return;
+           console.error("Failed to update recipe: ", error);
+           alert("Failed to update recipe: ", error);
+       }
+
+       try {
+           const response = await fetch(`/api/recipe/{{data['Recipe']['Id']}}/nutrients`, {
+               method: 'PUT',
+               headers: {
+                   'Content-Type': 'application/json'
+               },
+               body: JSON.stringify({
+                   calories: calories,
+                   fat: fat,
+                   satFat: satFat,
+                   carbs: carbs,
+                   sugar: sugar,
+                   fibre: fibre,
+                   protein: protein,
+                   salt: salt
                })
            });
 

@@ -55,6 +55,16 @@ def shopping():
     }
     return render_template('shopping.html', data=data, editable=True)
 
+@app.route('/raw-list', methods=['GET'])
+def phone():
+    all_recipes = Recipe().get_recipes()
+    data = {
+        "AllRecipes": [r.get_for_display() for r in all_recipes],
+        "Recipes": cart.get_recipes(),
+        "Ingredients": cart.get_required_ingredients()
+    }
+    return render_template('phone.html', data=data, editable=True)
+
 """
 API ENDPOINTS
 """
@@ -222,4 +232,4 @@ def remove_ingredient(ingredient_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(host='0.0.0.0')

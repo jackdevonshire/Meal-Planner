@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>Shopping List</title>
+    </head>
+    <body>
+      {% for category, ingredients in data["Ingredients"].items() %}
+          {% if ingredients|length > 0 %}
+          <h4>{{category}}</h4>
+          <ul>
+          {% for ingredient in ingredients %}
+              {% if ingredient["Required"] == 'Mandatory' %}
+              <li>{{ingredient["Name"]}} ({{ingredient["Amount"]}} {{ingredient["Unit"]}})</li>
+              {% else %}
+              <li>{{ingredient["Name"]}} ({{ingredient["Amount"]}} {{ingredient["Unit"]}}) - {{ingredient["Required"]}}</li>
+              {% endif %}
+          {% endfor %}
+          </ul>
+          {% endif %}
+      {% endfor %}
+    </body>
+</html>
